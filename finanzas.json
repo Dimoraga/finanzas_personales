@@ -1,0 +1,30 @@
+{
+    "2026-01": [
+        [
+            "Ingreso",
+            2000000,
+            ""
+        ],
+        [
+            "Ingreso",
+            300000,
+            "sueldo mes enero"
+        ],
+        [
+            "Gasto",
+            -20000,
+            ""
+        ],
+        [
+            "Ahorro",
+            140000,
+            "vivienda"
+        ],
+        [
+            "Ahorro",
+            1301000,
+            "fondos mutuos"
+        ]
+    ],
+    "2026-01_meta_ahorro": 1400000
+}
