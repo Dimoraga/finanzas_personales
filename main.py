@@ -1,7 +1,7 @@
 #Programa para registrar finanzas personales.
 
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox, simpledialog, ttk
 import json
 from saludo_inicio import mostrar_pantalla_inicio
 from reportlab.lib.pagesizes import letter
@@ -268,34 +268,37 @@ def actualizar_balance():
     label_balance.config(text=f"Balance actual: ${formatear_dinero(balance)}")
 
     # Actualizar columna de ingresos
-    text_ingresos.delete("1.0", tk.END)
+    for item in tree_ingresos.get_children():
+        tree_ingresos.delete(item)
     for movimiento in ingresos:
         if len(movimiento) >= 4:
             _, monto, desc, fecha = movimiento[0], movimiento[1], movimiento[2], movimiento[3]
-            text_ingresos.insert(tk.END, f"[{fecha}] ${formatear_dinero(monto)} - {desc}\n")
+            tree_ingresos.insert("", tk.END, values=(fecha, f"${formatear_dinero(monto)}", desc))
         else:
             _, monto, desc = movimiento[0], movimiento[1], movimiento[2]
-            text_ingresos.insert(tk.END, f"${formatear_dinero(monto)} - {desc}\n")
+            tree_ingresos.insert("", tk.END, values=("-", f"${formatear_dinero(monto)}", desc))
     
     # Actualizar columna de gastos
-    text_gastos.delete("1.0", tk.END)
+    for item in tree_gastos.get_children():
+        tree_gastos.delete(item)
     for movimiento in gastos:
         if len(movimiento) >= 4:
             _, monto, desc, fecha = movimiento[0], movimiento[1], movimiento[2], movimiento[3]
-            text_gastos.insert(tk.END, f"[{fecha}] ${formatear_dinero(abs(monto))} - {desc}\n")
+            tree_gastos.insert("", tk.END, values=(fecha, f"${formatear_dinero(abs(monto))}", desc))
         else:
             _, monto, desc = movimiento[0], movimiento[1], movimiento[2]
-            text_gastos.insert(tk.END, f"${formatear_dinero(abs(monto))} - {desc}\n")
+            tree_gastos.insert("", tk.END, values=("-", f"${formatear_dinero(abs(monto))}", desc))
 
     # Actualizar columna de ahorros
-    text_ahorros.delete("1.0", tk.END)
+    for item in tree_ahorros.get_children():
+        tree_ahorros.delete(item)
     for movimiento in ahorros:
         if len(movimiento) >= 4:
             _, monto, desc, fecha = movimiento[0], movimiento[1], movimiento[2], movimiento[3]
-            text_ahorros.insert(tk.END, f"[{fecha}] ${formatear_dinero(monto)} - {desc}\n")
+            tree_ahorros.insert("", tk.END, values=(fecha, f"${formatear_dinero(monto)}", desc))
         else:
             _, monto, desc = movimiento[0], movimiento[1], movimiento[2]
-            text_ahorros.insert(tk.END, f"${formatear_dinero(monto)} - {desc}\n")
+            tree_ahorros.insert("", tk.END, values=("-", f"${formatear_dinero(monto)}", desc))
 
     # Actualizar totales
     label_total_ingresos.config(text=f"Ingresos Totales: ${formatear_dinero(total_ingresos)}")
@@ -381,11 +384,16 @@ def generar_reporte_pdf():
             elementos.append(Paragraph("<b>Detalle de Ingresos:</b>", estilos['Heading2']))
             elementos.append(Spacer(1, 0.2*inch))
             
-            datos_ingresos = [["Monto", "Observación"]]
-            for _, monto, desc in ingresos:
-                datos_ingresos.append([f"${formatear_dinero(monto)}", desc])
+            datos_ingresos = [["Fecha", "Monto", "Observación"]]
+            for movimiento in ingresos:
+                if len(movimiento) >= 4:
+                    _, monto, desc, fecha = movimiento[0], movimiento[1], movimiento[2], movimiento[3]
+                    datos_ingresos.append([fecha, f"${formatear_dinero(monto)}", desc])
+                else:
+                    _, monto, desc = movimiento[0], movimiento[1], movimiento[2]
+                    datos_ingresos.append(["-", f"${formatear_dinero(monto)}", desc])
             
-            tabla_ingresos = Table(datos_ingresos, colWidths=[1.5*inch, 4*inch])
+            tabla_ingresos = Table(datos_ingresos, colWidths=[1*inch, 1.5*inch, 3.5*inch])
             tabla_ingresos.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.green),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -405,11 +413,16 @@ def generar_reporte_pdf():
             elementos.append(Paragraph("<b>Detalle de Gastos:</b>", estilos['Heading2']))
             elementos.append(Spacer(1, 0.2*inch))
             
-            datos_gastos = [["Monto", "Observación"]]
-            for _, monto, desc in gastos:
-                datos_gastos.append([f"${formatear_dinero(abs(monto))}", desc])
+            datos_gastos = [["Fecha", "Monto", "Observación"]]
+            for movimiento in gastos:
+                if len(movimiento) >= 4:
+                    _, monto, desc, fecha = movimiento[0], movimiento[1], movimiento[2], movimiento[3]
+                    datos_gastos.append([fecha, f"${formatear_dinero(abs(monto))}", desc])
+                else:
+                    _, monto, desc = movimiento[0], movimiento[1], movimiento[2]
+                    datos_gastos.append(["-", f"${formatear_dinero(abs(monto))}", desc])
             
-            tabla_gastos = Table(datos_gastos, colWidths=[1.5*inch, 4*inch])
+            tabla_gastos = Table(datos_gastos, colWidths=[1*inch, 1.5*inch, 3.5*inch])
             tabla_gastos.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.red),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -429,11 +442,16 @@ def generar_reporte_pdf():
             elementos.append(Paragraph("<b>Detalle de Ahorros:</b>", estilos['Heading2']))
             elementos.append(Spacer(1, 0.2*inch))
             
-            datos_ahorros = [["Monto", "Observación"]]
-            for _, monto, desc in ahorros:
-                datos_ahorros.append([f"${formatear_dinero(monto)}", desc])
+            datos_ahorros = [["Fecha", "Monto", "Observación"]]
+            for movimiento in ahorros:
+                if len(movimiento) >= 4:
+                    _, monto, desc, fecha = movimiento[0], movimiento[1], movimiento[2], movimiento[3]
+                    datos_ahorros.append([fecha, f"${formatear_dinero(monto)}", desc])
+                else:
+                    _, monto, desc = movimiento[0], movimiento[1], movimiento[2]
+                    datos_ahorros.append(["-", f"${formatear_dinero(monto)}", desc])
             
-            tabla_ahorros = Table(datos_ahorros, colWidths=[1.5*inch, 4*inch])
+            tabla_ahorros = Table(datos_ahorros, colWidths=[1*inch, 1.5*inch, 3.5*inch])
             tabla_ahorros.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -472,7 +490,7 @@ def limpiar_todo_datos():
 
 def abrir_ventana_principal(mes, anio):
     global mes_actual, ventana_principal, entry_monto, entry_desc, entry_fecha, label_balance
-    global text_ingresos, text_gastos, text_ahorros, label_total_ingresos, label_total_gastos, label_total_ahorros
+    global tree_ingresos, tree_gastos, tree_ahorros, label_total_ingresos, label_total_gastos, label_total_ahorros
     global label_meta_ahorro, label_progreso_ahorro
     
     mes_actual = f"{anio}-{mes:02d}"
@@ -525,15 +543,51 @@ def abrir_ventana_principal(mes, anio):
     tk.Label(ventana_principal, text="Gastos", font=("Arial", 11, "bold")).grid(row=5, column=2, columnspan=2)
     tk.Label(ventana_principal, text="Ahorros", font=("Arial", 11, "bold")).grid(row=5, column=4, columnspan=2)
 
-    # --- Columnas de movimientos ---
-    text_ingresos = tk.Text(ventana_principal, height=15, width=30)
-    text_ingresos.grid(row=6, column=0, columnspan=2, padx=5, pady=5)
+    # --- Columnas de movimientos con Treeview (estilo Excel) ---
+    # Treeview para Ingresos
+    tree_ingresos = ttk.Treeview(ventana_principal, columns=("Fecha", "Monto", "Descripción"), show="headings", height=12)
+    tree_ingresos.heading("Fecha", text="Fecha")
+    tree_ingresos.heading("Monto", text="Monto")
+    tree_ingresos.heading("Descripción", text="Descripción")
+    tree_ingresos.column("Fecha", width=90, anchor="center")
+    tree_ingresos.column("Monto", width=90, anchor="e")
+    tree_ingresos.column("Descripción", width=150, anchor="w")
+    tree_ingresos.grid(row=6, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
+    
+    # Scrollbar para Ingresos
+    scroll_ingresos = ttk.Scrollbar(ventana_principal, orient="vertical", command=tree_ingresos.yview)
+    tree_ingresos.configure(yscrollcommand=scroll_ingresos.set)
+    scroll_ingresos.grid(row=6, column=1, sticky="nse", pady=5)
 
-    text_gastos = tk.Text(ventana_principal, height=15, width=30)
-    text_gastos.grid(row=6, column=2, columnspan=2, padx=5, pady=5)
+    # Treeview para Gastos
+    tree_gastos = ttk.Treeview(ventana_principal, columns=("Fecha", "Monto", "Descripción"), show="headings", height=12)
+    tree_gastos.heading("Fecha", text="Fecha")
+    tree_gastos.heading("Monto", text="Monto")
+    tree_gastos.heading("Descripción", text="Descripción")
+    tree_gastos.column("Fecha", width=90, anchor="center")
+    tree_gastos.column("Monto", width=90, anchor="e")
+    tree_gastos.column("Descripción", width=150, anchor="w")
+    tree_gastos.grid(row=6, column=2, columnspan=2, padx=5, pady=5, sticky="nsew")
+    
+    # Scrollbar para Gastos
+    scroll_gastos = ttk.Scrollbar(ventana_principal, orient="vertical", command=tree_gastos.yview)
+    tree_gastos.configure(yscrollcommand=scroll_gastos.set)
+    scroll_gastos.grid(row=6, column=3, sticky="nse", pady=5)
 
-    text_ahorros = tk.Text(ventana_principal, height=15, width=30)
-    text_ahorros.grid(row=6, column=4, columnspan=2, padx=5, pady=5)
+    # Treeview para Ahorros
+    tree_ahorros = ttk.Treeview(ventana_principal, columns=("Fecha", "Monto", "Descripción"), show="headings", height=12)
+    tree_ahorros.heading("Fecha", text="Fecha")
+    tree_ahorros.heading("Monto", text="Monto")
+    tree_ahorros.heading("Descripción", text="Descripción")
+    tree_ahorros.column("Fecha", width=90, anchor="center")
+    tree_ahorros.column("Monto", width=90, anchor="e")
+    tree_ahorros.column("Descripción", width=150, anchor="w")
+    tree_ahorros.grid(row=6, column=4, columnspan=2, padx=5, pady=5, sticky="nsew")
+    
+    # Scrollbar para Ahorros
+    scroll_ahorros = ttk.Scrollbar(ventana_principal, orient="vertical", command=tree_ahorros.yview)
+    tree_ahorros.configure(yscrollcommand=scroll_ahorros.set)
+    scroll_ahorros.grid(row=6, column=5, sticky="nse", pady=5)
 
     # --- Fila de totales por columna ---
     label_total_ingresos = tk.Label(ventana_principal, text="Ingresos Totales: $0", font=("Arial", 10, "bold"))
