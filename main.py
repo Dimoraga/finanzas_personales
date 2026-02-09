@@ -19,12 +19,17 @@ ventana_principal = None
 label_meta_ahorro = None
 label_progreso_ahorro = None
 
-# Gastos frecuentes predeterminados
+# Gastos frecuentes predeterminados 
 gastos_frecuentes_default = [
     "Cuenta de Luz",
     "Cuenta de Agua",
     "Pago de Arriendo",
-    "Cuenta de Internet"
+    "Cuenta de Internet",
+    "Apoyo Pueblo Viejo",
+    "Celular",
+    "Seguro Auto",
+    "Tarjeta Crédito",
+    "Autopistas"
 ]
 
 def cargar_datos():
@@ -253,6 +258,7 @@ def abrir_ventana_gastos_frecuentes():
         width=15
     )
     btn_cerrar.pack(pady=10)
+
 
 def actualizar_balance():
     ingresos = [m for m in finanzas[mes_actual] if m[0] == "Ingreso"]
@@ -636,6 +642,13 @@ def iniciar_app_principal():
         if anio is None: 
             ventana_temporal.destroy()
             return
+        
+        # Validar que el año sea 2026 o posterior
+        if anio < 2026:
+            messagebox.showerror("Error", "Solo se permiten años desde 2026 en adelante.")
+            ventana_temporal.destroy()
+            return
+        
         mes = simpledialog.askinteger("Mes", "Ingrese el mes (1-12):", parent=ventana_temporal, minvalue=1, maxvalue=12)
         if mes is None: 
             ventana_temporal.destroy()
